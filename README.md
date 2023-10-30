@@ -23,7 +23,7 @@ The Monthly Shift Scheduler is a versatile tool that generates work schedules fo
 ### Option 1: Executable (Windows)
 
 1. Download the project as a zip file.
-2. Run `Monthly_Shift_Scheduler.exe` on Windows.
+2. Run `main.exe` on Windows.
 
 ### Option 2: Python Script
 
