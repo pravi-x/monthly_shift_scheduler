@@ -54,6 +54,13 @@ python main_cmd.py
 
 ![Alt text](image-1.png)
 
+## How to compile to exe
+1. Download [Auto PY to EXE](https://pypi.org/project/auto-py-to-exe/).
+2. Locate the executable in the file system (the installation process informs you of the location)
+3. Double-click on auto-py-to-exe.exe.
+4. Follow the instructions provided by Auto PY to EXE to compile the project into an executable. This section provides clear instructions on how to compile the project to an executable using Auto PY to EXE.
+
+
 ## Author
 
 - [pravi-x](https://github.com/pravi-x)
@@ -65,3 +72,7 @@ python main_cmd.py
 ## Enjoy Using Monthly Shift Scheduler!
 
 Feel free to contribute, report issues, or provide feedback. Your input helps improve this tool for everyone.
+
+
+
+
