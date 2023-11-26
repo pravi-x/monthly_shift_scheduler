@@ -631,79 +631,78 @@ class Schedule:
         workbook = xlsxwriter.Workbook(filename)
         worksheet = workbook.add_worksheet()
 
-        # Define a bold format to use for headers.
-        bold = workbook.add_format({"bold": True})
-
-        # Define a format for prefrenced days (light red fill)
-        prefrenced_format = workbook.add_format(
+        # Define the formats for the cells
+        format_title = workbook.add_format({"bold": True})
+        format_pref_day = workbook.add_format(
             {"bold": True, "bg_color": "#ffcccc", "border": 1}
         )
-
-        # Define a format for holidays (darker gray fill) and bold
-        holiday_format = workbook.add_format(
+        format_hodiday = workbook.add_format(
             {"bold": True, "bg_color": "#d3d3d3", "border": 1}
         )
+        format_shift_day = workbook.add_format({"border": 1, "align": "center"})
 
-        # Set the column width for the Employee Names and Total Shift Count and Holiday Count columns
-        worksheet.set_column("A:A", 20)
-        worksheet.set_column("B:B", 10)
-        worksheet.set_column("C:C", 10)
+        # Set the column width
+        worksheet.set_column("A:A", 20)  # Name
+        worksheet.set_column("B:B", 10)  # Total Shifts
+        worksheet.set_column("C:C", 10)  # Total Holidays
+        worksheet.set_column("D:AI", 3)  # days of the month
 
-        # Set the column width for the days
-        worksheet.set_column("D:AI", 3)
+        # Write the headers
+        worksheet.write("A2", "ΟΝΟΜΑ", format_title)
+        worksheet.write("B2", "ΣΥΝΟΛΟ", format_title)
+        worksheet.write("C2", "ΑΡΓΙΕΣ", format_title)
 
+        # sort the workers by id
+        self.workers = sorted(self.workers, key=lambda x: x.id)
+
+        # set the row and column to start writing the data
+        row = 2
         col = 0
-        row = 1
 
-        # Write the headers for Names and Shift Count
-        worksheet.write("A1", "ΟΝΟΜΑ", bold)
-        worksheet.write("B1", "ΣΥΝΟΛΟ", bold)
-        worksheet.write("C1", "ΑΡΓΙΕΣ", bold)
-
-        # Write employee data
+        # Write employee names and excel formulas for total shifts and total holidays
         for worker in self.workers:
             worksheet.write(row, col, str(worker.name))
-            worksheet.write(row, col + 1, worker.total)
-            worksheet.write(row, col + 2, worker.total_holidays)
+            worksheet.write(row, col + 1, f'COUNTIF(E{row+1}:AI{row+1};"X")')
+            worksheet.write(
+                row, col + 2, f'COUNTIFS(E{row+1}:AI{row+1};"X";E$1:AI$1;TRUE)'
+            )
             row += 1
 
         col = 4
-        row = 1
 
         # Write the days as headers
         for day in range(num_days - 1):
             day_label = day + 1
-            header_format = bold if day_label not in holidays else holiday_format
-            worksheet.write(0, col + day, day_label, header_format)
+            if day_label in holidays:
+                header_format = format_hodiday
+                worksheet.write(0, col + day, "TRUE", format_hodiday)
+            else:
+                header_format = format_title
+            worksheet.write(1, col + day, day_label, header_format)
+
+        # check if every day has a shift
+        worksheet.write(
+            len(self.workers) + 3,
+            col + day,
+            f'COUNTIF(E3:AI{len(self.workers)+3};"X")',
+        )
+
+        row = 2
+        row_pref = 2
 
         # Write the schedule for each worker
         for worker in self.workers:
             worker_schedule = [
-                "X" if day in worker.shifts else "" for day in range(1, num_days)
+                "X" if day in worker.shifts else " " for day in range(1, num_days)
             ]
-            shift_format = workbook.add_format({"border": 1, "align": "center"})
-            worksheet.write_row(row, col, worker_schedule, shift_format)
+            print(worker_schedule)
+            worksheet.write_row(row, col, worker_schedule, format_shift_day)
             row += 1
 
-        # make the cells with the prefrenced days light red
-        col = 4
-        row = 1
-        for worker in self.workers:
+            # make the cells with the prefrenced days light red
             for day in worker.pref:
-                worksheet.write(row, col + day - 1, "", prefrenced_format)
-            row += 1
-        # write the shifts one under the other in the format Day: Employee
-        row = len(self.workers) + 2
-        col = 0
-        worksheet.write(len(self.workers) + 2, col, "ΑΝΑΛΥΣΗ ΑΝΑ ΜΕΡΑ", bold)
-
-        # write the shifts one under the other in the format Day: Employee
-        for day in range(1, num_days):
-            row += 1
-            header_format = bold if day not in holidays else holiday_format
-            worksheet.write(
-                row, col, f"{day:02d}:{self.shifts.get(day)}", header_format
-            )
+                worksheet.write(row_pref, col + day - 1, "", format_pref_day)
+            row_pref += 1
 
         # Close the workbook.
         workbook.close()
