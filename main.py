@@ -693,7 +693,7 @@ class Schedule:
         # Write the schedule for each worker
         for worker in self.workers:
             worker_schedule = [
-                "X" if day in worker.shifts else " " for day in range(1, num_days)
+                "X" if day in worker.shifts else "" for day in range(1, num_days)
             ]
             print(worker_schedule)
             worksheet.write_row(row, col, worker_schedule, format_shift_day)
